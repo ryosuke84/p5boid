@@ -1,8 +1,8 @@
 {
-  "name": "boid",
+  "name": "p5boid",
   "version": "1.0.0",
   "description": "",
-  "main": "src/index.js",
+  "main": "examples/index.js",
   "scripts": {
     "start": "parcel index.html --open --no-hmr --no-cache",
     "build": "parcel build index.html"
