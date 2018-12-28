@@ -1,15 +1,10 @@
-// export const createBoid({ p5Instance, initX, initY, maxVelocity, maxSteeringVelocity, dampening }) => ({
-//   p5 : p5Instance,
-//   location = p5.createVector(initX, initY),
-//   velocity = p5.createVector(),
-//   acceleration = p5.createVector(),
-//   maxVelocity,
-//   maxSteeringVelocity,
-//   dampening,
-//   vHeight : 20,
-//   vWidth : 10,
-//   v1 : null,
-//   v2 : null,
-//   v3 = null
+import Boid from "./boid";
+import { randomWalkingMixin, mouseSeekingMixin, fovMixin } from "./behaviors";
 
-// })
+export const createBoid = config => Boid(config);
+export const createRandomWalkingMixin = () => randomWalkingMixin;
+export const createMouseSeekingMixin = () => mouseSeekingMixin;
+export const createFovMixin = config => self => {
+  config = Object.assign(config, { self });
+  return fovMixin(config);
+};

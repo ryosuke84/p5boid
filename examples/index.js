@@ -3,7 +3,7 @@ import p5 from "p5";
 import "p5/lib/addons/p5.dom";
 import compose from "lodash.flowright";
 
-import Boid from "../src/creature.js";
+import { createBoid, createRandomWalkingMixin, createMouseSeekingMixin, createFovMixin } from "../src/index.js";
 // import Boid from "@ryosuke84/boid";
 // import Creature from "./creature.js";
 // import ControllableBoid from "./controllableBoid.js";
@@ -21,7 +21,7 @@ const sketch = p5 => {
 
     // const RandomFovBoid = compose([GoRandomMixin, createFovMixin({ fovRadius: 60, fovAngle: Math.PI / 4 }), MouseSeekingMixin])(Boid);
 
-    creature = new Boid({
+    creature = createBoid({
       p5Instance: p5,
       initX: p5.width / 2,
       initY: p5.height / 2,
@@ -29,6 +29,11 @@ const sketch = p5 => {
       maxSteeringVelocity: 0.3,
       dampening: 0.93
     });
+
+    const withRandomWalk = createRandomWalkingMixin();
+    const withMouseSeeking = createMouseSeekingMixin();
+    const withFovMixin = createFovMixin({ fovRadius: 60, fovAngle: Math.PI / 4 });
+    creature = Object.assign(creature, withRandomWalk(creature), withMouseSeeking(creature), withFovMixin(creature));
   };
 
   p5.draw = () => {
@@ -54,11 +59,11 @@ const sketch = p5 => {
       }
     }
 
-    // if (p5.mouseIsPressed && creature.seekMouse) {
-    //   creature.seekMouse(p5.mouseX, p5.mouseY);
-    // } else {
-    //   creature.goRandom();
-    // }
+    if (p5.mouseIsPressed && creature.seekMouse) {
+      creature.seekMouse(p5.mouseX, p5.mouseY);
+    } else {
+      creature.goRandom();
+    }
   };
 };
 

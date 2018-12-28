@@ -45,6 +45,7 @@ export default ({ p5Instance, initX, initY, maxVelocity, maxSteeringVelocity, da
   };
 
   return {
+    p5: p5Instance,
     location: p5.createVector(initX, initY),
     velocity: p5.createVector(),
     acceleration: p5.createVector(),
