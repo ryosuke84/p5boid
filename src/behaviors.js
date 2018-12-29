@@ -6,6 +6,10 @@ export const randomWalkingMixin = self => {
   let noiseY = noiseX + 10000;
 
   return {
+    /**
+     * Walk randomly
+     * @param {string} test - No need for input
+     */
     goRandom() {
       noiseX += noiseIncrement;
       noiseY += noiseIncrement;
@@ -15,35 +19,6 @@ export const randomWalkingMixin = self => {
     }
   };
 };
-// export const GoRandomMixin = superclass => {
-//   let noiseIncrement = 0.03;
-//   let noiseX = p5.prototype.random(0, 1000);
-//   let noiseY = noiseX + 10000;
-//   return class extends superclass {
-//     //   constructor(...args) {
-//     //     super(...args);
-//     //     this.noiseIncrement = 0.03;
-//     //     this.noiseX = this.p5.random(0, 1000);
-//     //     this.noiseY = this.noiseX + 10000;
-//     //   }
-
-//     // goRandom() {
-//     //   const p5 = this.p5;
-//     //   this.noiseX += this.noiseIncrement;
-//     //   this.noiseY += this.noiseIncrement;
-//     //   const mappedX = p5.map(p5.noise(this.noiseX), 0, 1, -1, 1, true);
-//     //   const mappedY = p5.map(p5.noise(this.noiseY), 0, 1, -1, 1, true);
-//     //   this.applyForce(p5.createVector(mappedX, mappedY));
-//     // }
-//     goRandom() {
-//       noiseX += noiseIncrement;
-//       noiseY += noiseIncrement;
-//       const mappedX = p5.prototype.map(p5.prototype.noise(noiseX), 0, 1, -1, 1, true);
-//       const mappedY = p5.prototype.map(p5.prototype.noise(noiseY), 0, 1, -1, 1, true);
-//       super.applyForce(p5.prototype.createVector(mappedX, mappedY));
-//     }
-//   };
-// };
 
 export const mouseSeekingMixin = self => ({
   seekMouse(mouseX, mouseY) {
@@ -53,16 +28,6 @@ export const mouseSeekingMixin = self => ({
     self.applyForce(force);
   }
 });
-
-// export const MouseSeekingMixin = superclass =>
-//   class extends superclass {
-//     seekMouse(mouseX, mouseY) {
-//       const p5 = this.p5;
-//       const mouse = p5.createVector(mouseX, mouseY);
-//       const force = mouse.sub(this.location);
-//       this.applyForce(force);
-//     }
-//   };
 
 export const fovMixin = ({ self, fovRadius, fovAngle }) => {
   const _getFovPoints = self => {
@@ -98,9 +63,11 @@ export const fovMixin = ({ self, fovRadius, fovAngle }) => {
         }
       }
     }
-    this.fovPoints = points;
+    // this.fovPoints = points;
     return points;
   };
+
+  let fovPoints = _getFovPoints(self);
 
   return {
     renderFov() {
@@ -116,87 +83,25 @@ export const fovMixin = ({ self, fovRadius, fovAngle }) => {
         p5.PIE
       );
       p5.pop();
+    },
+
+    updateFovPoints() {
+      const newPositions = [];
+      for (const pos of fovPoints) {
+        const newTheta = (pos.theta = self.velocity.heading() + pos.deltaTheta);
+        const newX = pos.r * Math.cos(newTheta) + self.location.x;
+        const newY = pos.r * Math.sin(newTheta) + self.location.y;
+        const newPos = {
+          x: Math.floor(newX),
+          y: Math.floor(newY),
+          r: pos.r,
+          theta: newTheta,
+          deltaTheta: pos.deltaTheta
+        };
+        newPositions.push(newPos);
+      }
+      // this.fovPoints = newPositions;
+      return newPositions;
     }
   };
-};
-
-export const createFocMixin = ({ fovRadius = 60, fovAngle = Math.PI / 4 }) => {
-  return superclass =>
-    class extends superclass {
-      constructor(...args) {
-        super(...args);
-        this.fovPoints = this._getFovPoints();
-      }
-
-      renderFov() {
-        const p5 = this.p5;
-        p5.push();
-        p5.arc(
-          this.location.x,
-          this.location.y,
-          fovRadius * 2,
-          fovRadius * 2,
-          this.velocity.heading() - fovAngle,
-          this.velocity.heading() + fovAngle,
-          p5.PIE
-        );
-        p5.pop();
-      }
-
-      _getFovPoints() {
-        const start = this.velocity.heading() - fovAngle;
-        const end = this.velocity.heading() + fovAngle;
-        const T1 = start >= -Math.PI ? start : start + Math.PI * 2;
-        const T2 = end < Math.PI ? end : end - Math.PI * 2;
-
-        //Check if start and end angles are into II and III quadrant
-        const reversedAngles = T1 > T2;
-
-        const points = [];
-        for (let x = this.location.x - fovRadius; x < this.location.x + fovRadius; x++) {
-          for (let y = this.location.y - fovRadius; y < this.location.y + fovRadius; y++) {
-            const r = Math.sqrt(Math.pow(x - this.location.x, 2) + Math.pow(y - this.location.y, 2));
-            let theta = Math.atan2(y - this.location.y, x - this.location.x);
-
-            if (
-              r < fovRadius &&
-              //  The condition to check whenstart and end angles are into II and III quadrant --------
-              ((reversedAngles && ((theta >= -Math.PI && theta < T2) || (theta > T1 && theta <= Math.PI))) ||
-                //  The condition to check when start and end angles are not into II and III quadrant --------
-                (!reversedAngles && theta > T1 && theta < T2))
-            ) {
-              // points.push({ x: Math.floor(x), y: Math.floor(y) });
-              points.push({
-                x: Math.floor(x),
-                y: Math.floor(y),
-                r: r,
-                theta: theta,
-                deltaTheta: theta - this.velocity.heading()
-              });
-            }
-          }
-        }
-        this.fovPoints = points;
-        return points;
-      }
-
-      updateFovPoints() {
-        const newPositions = [];
-        for (const pos of this.fovPoints) {
-          const newTheta = (pos.theta = this.velocity.heading() + pos.deltaTheta);
-          const newX = pos.r * Math.cos(newTheta) + this.location.x;
-          const newY = pos.r * Math.sin(newTheta) + this.location.y;
-          const newPos = {
-            x: Math.floor(newX),
-            y: Math.floor(newY),
-            r: pos.r,
-            theta: newTheta,
-            deltaTheta: pos.deltaTheta
-          };
-          newPositions.push(newPos);
-        }
-        this.fovPoints = newPositions;
-        return newPositions;
-      }
-    };
 };
