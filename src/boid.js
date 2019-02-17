@@ -85,8 +85,8 @@ export default ({ p5Instance, initX, initY, maxVelocity, maxSteeringVelocity, da
       this.render();
     },
 
-    setColor(color) {
-      this.fillColor = color;
+    setColor(R, G, B) {
+      this.fillColor = p5.color(R, G, B);
     }
   };
 };

@@ -67,6 +67,7 @@ const sketch = p5 => {
     p5.background(255);
 
     for (let c of creatures) {
+      c.setColor(164, 246, 165);
       c.run();
       if (c.renderFov) {
         c.renderFov();
