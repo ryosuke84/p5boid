@@ -4,7 +4,7 @@ export default ({ p5Instance, initX, initY, maxVelocity, maxSteeringVelocity, da
   const _draw = self => {
     // const p5 = this.p5;
     p5.stroke(0);
-    p5.fill(175);
+    p5.fill(self.fillColor);
 
     self.v1 = p5.createVector(0, 0);
     self.v2 = p5.createVector(-self.vWidth / 2, self.vHeight);
@@ -57,6 +57,7 @@ export default ({ p5Instance, initX, initY, maxVelocity, maxSteeringVelocity, da
     v1: null,
     v2: null,
     v3: null,
+    fillColor: p5.color(175, 715, 175),
 
     render() {
       _displayVehicle(this);
@@ -82,6 +83,10 @@ export default ({ p5Instance, initX, initY, maxVelocity, maxSteeringVelocity, da
       this.update();
       _checkBoundaries(this);
       this.render();
+    },
+
+    setColor(color) {
+      this.fillColor = color;
     }
   };
 };
